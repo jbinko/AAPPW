@@ -34,6 +34,17 @@ Approve once, deploy multiple times in the same secure way.
 - Protect and encrypt storage where potentially sensitive data are stored
 - Protect keys and credentials in secure place
 
+### Key Components in the solution
+
+- Azure App Service and App plan exposing applications (Azure Functions)
+- Monitoring of the solution with Azure Log Analytics Workspace, Azure Application Insights and Azure Monitor as tools for monitoring, security and audit
+- Azure SQL Database as backend application database for the solution
+- Azure Key Vault to store secrets and credentials for the solution
+- Azure Storage to provide application storage for the solution
+- Backend Virtual Network with monitoring and network security groups to protect backend resources (Key Vault, Storage, SQL)
+- Private Links integrated with backend VNET to protect backend resources (Key Vault, Storage, SQL)
+- Azure storage to store diagnostics and audit information
+
 ## Deployment
 
 Deployment of Azure Application Workspace can be done through provided Azure Resource Manager [AAPPW.bicep](DeploymentScripts/AAPPW.bicep) file or via generated Azure Resource Manager Template file [AAPPW.json](DeploymentScripts/AAPPW.json) which itself is based on ARM Bicep file.
