@@ -33,3 +33,19 @@ Approve once, deploy multiple times in the same secure way.
 - Integrations with other cloud native tools
 - Protect and encrypt storage where potentially sensitive data are stored
 - Protect keys and credentials in secure place
+
+## Deployment
+
+Deployment of Azure Application Workspace can be done through provided Azure Resource Manager [AAPPW.bicep](DeploymentScripts/AAPPW.bicep) file or via generated Azure Resource Manager Template file [AAPPW.json](DeploymentScripts/AAPPW.json) which itself is based on ARM Bicep file.
+
+You can find those script files in [DeploymentScripts](DeploymentScripts) directory.
+
+Deployment file will provision resources which are part of Azure Application Workspace.
+
+### Deployment Example
+
+```bash
+az group create --name AAPPW --location NorthEurope --tags Costcenter=ABC001 Owner='Bob' --subscription "Subscription001"
+
+az deployment group create -n AAPPW -g AAPPW -f AAPPW.bicep --parameters projectPrefix=proj01 securityOwnerAADLogin=aappwAdmin@xyz.com securityOwnerAADId=00000000-0000-0000-0000-000000000000 securityAlertEmail=aappwAdmin@xyz.com sqlServerLogin=myUserName sqlServerPassword=myPassword --subscription "Subscription001"
+```
