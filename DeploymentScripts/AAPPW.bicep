@@ -32,7 +32,7 @@ param location string = resourceGroup().location
 
 // Optional Parameter
 @description('Tags to be associated with deployed resources.')
-param resourceTags object = resourceGroup().tags
+param resourceTags object = (contains(resourceGroup(), 'tags') ? resourceGroup().tags : {} )
 
 // Optional Parameter
 @description('Address space of the Virtual Network.')
@@ -68,19 +68,21 @@ param appSvcPlanSkuName string = 'S2'
 
 // ----- VARIABLES
 
+var lowerProjectPrefix = toLower(projectPrefix)
+
 var plBlobDnsZone = 'privatelink.blob.core.windows.net'
 var plKvDnsZone = 'privatelink.vaultcore.azure.net'
 var plSqlDnsZone = 'privatelink.database.windows.net'
 
-var laUniqueName = '${projectPrefix}-appsvc-la'
+var laUniqueName = '${lowerProjectPrefix}-appsvc-la'
 
-var vNetName = '${projectPrefix}-appsvc-vnet'
+var vNetName = '${lowerProjectPrefix}-appsvc-vnet'
 var vNetNsgFlowLogRetentionInDays = 31
 
-var saDiagUniqueName = '${projectPrefix}appsvcdiagsa'
-var saContentUniqueName = '${projectPrefix}appsvccontentsa'
+var saDiagUniqueName = '${lowerProjectPrefix}appsvcdiagsa'
+var saContentUniqueName = '${lowerProjectPrefix}appsvccontentsa'
 
-var kvUniqueName = '${projectPrefix}-appsvc-kv'
+var kvUniqueName = '${lowerProjectPrefix}-appsvc-kv'
 var kvKeyPermissionsAll = [
   'backup'
   'create'
@@ -144,8 +146,8 @@ var kvStoragePermissionsAll = [
   'update'
 ]
 
-var sqlServerUniqueName = '${projectPrefix}-appsvc-sql'
-var sqlServerDBUniqueName = '${projectPrefix}-appsvc-sql-db'
+var sqlServerUniqueName = '${lowerProjectPrefix}-appsvc-sql'
+var sqlServerDBUniqueName = '${lowerProjectPrefix}-appsvc-sql-db'
 // Keep weekly backups for 1 week
 var sqlServerDBWeeklyRetention = 'P1W' // Valid value is between 1 to 520 weeks. e.g. P1Y, P1M, P1W or P7D.
 // Keep the first backup of each month for 1 month
@@ -154,9 +156,9 @@ var sqlServerDBMonthlyRetention = 'P1M' // Valid value is between 1 to 120 month
 var sqlServerDBYearlyRetention = 'P5Y' // Valid value is between 1 to 10 years. e.g. P1Y, P12M, P52W or P365D.
 var sqlServerDBWeekOfYear = 1 // The week of year to take the yearly backup. Value has to be between 1 and 52.
 
-var appSvcPlanUniqueName = '${projectPrefix}-appsvc-plan'
-var appSvcInsightsUniqueName = '${projectPrefix}-appsvc-insights'
-var appSvcFunctionUniqueName = '${projectPrefix}-appsvc-function'
+var appSvcPlanUniqueName = '${lowerProjectPrefix}-appsvc-plan'
+var appSvcInsightsUniqueName = '${lowerProjectPrefix}-appsvc-insights'
+var appSvcFunctionUniqueName = '${lowerProjectPrefix}-appsvc-function'
 
 // ----- PRIVATE LINK
 
@@ -270,7 +272,7 @@ resource la_diagnostics 'Microsoft.Insights/diagnosticSettings@2017-05-01-previe
 // ----- NETWORKING
 
 resource nsgAppService 'Microsoft.Network/networkSecurityGroups@2020-08-01' = {
-  name: '${projectPrefix}-appsvc-nsg'
+  name: '${lowerProjectPrefix}-appsvc-nsg'
   location: location
   tags: resourceTags
   properties: {
@@ -365,7 +367,7 @@ resource nsgAppService_diagnostics 'Microsoft.Insights/diagnosticSettings@2017-0
 }
 
 resource nsgPrivateLink 'Microsoft.Network/networkSecurityGroups@2020-08-01' = {
-  name: '${projectPrefix}-appsvc-nsg-private-link'
+  name: '${lowerProjectPrefix}-appsvc-nsg-private-link'
   location: location
   tags: resourceTags
   properties: {
@@ -871,7 +873,7 @@ resource sql_AADAuth 'Microsoft.Sql/servers/administrators@2020-08-01-preview' =
 }
 
 resource sql_auditingRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid('${projectPrefix}', resourceGroup().id, deployment().name, sql.name)
+  name: guid('${lowerProjectPrefix}', resourceGroup().id, deployment().name, sql.name)
   scope: sadiag
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe') // Storage Blob Data Contributor

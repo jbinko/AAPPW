@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.4.63.48766",
-      "templateHash": "9256385774141315136"
+      "version": "0.4.451.19169",
+      "templateHash": "16691944206941867135"
     }
   },
   "parameters": {
@@ -61,7 +61,7 @@
     },
     "resourceTags": {
       "type": "object",
-      "defaultValue": "[resourceGroup().tags]",
+      "defaultValue": "[if(contains(resourceGroup(), 'tags'), resourceGroup().tags, createObject())]",
       "metadata": {
         "description": "Tags to be associated with deployed resources."
       }
@@ -125,15 +125,16 @@
   },
   "functions": [],
   "variables": {
+    "lowerProjectPrefix": "[toLower(parameters('projectPrefix'))]",
     "plBlobDnsZone": "privatelink.blob.core.windows.net",
     "plKvDnsZone": "privatelink.vaultcore.azure.net",
     "plSqlDnsZone": "privatelink.database.windows.net",
-    "laUniqueName": "[format('{0}-appsvc-la', parameters('projectPrefix'))]",
-    "vNetName": "[format('{0}-appsvc-vnet', parameters('projectPrefix'))]",
+    "laUniqueName": "[format('{0}-appsvc-la', variables('lowerProjectPrefix'))]",
+    "vNetName": "[format('{0}-appsvc-vnet', variables('lowerProjectPrefix'))]",
     "vNetNsgFlowLogRetentionInDays": 31,
-    "saDiagUniqueName": "[format('{0}appsvcdiagsa', parameters('projectPrefix'))]",
-    "saContentUniqueName": "[format('{0}appsvccontentsa', parameters('projectPrefix'))]",
-    "kvUniqueName": "[format('{0}-appsvc-kv', parameters('projectPrefix'))]",
+    "saDiagUniqueName": "[format('{0}appsvcdiagsa', variables('lowerProjectPrefix'))]",
+    "saContentUniqueName": "[format('{0}appsvccontentsa', variables('lowerProjectPrefix'))]",
+    "kvUniqueName": "[format('{0}-appsvc-kv', variables('lowerProjectPrefix'))]",
     "kvKeyPermissionsAll": [
       "backup",
       "create",
@@ -196,15 +197,15 @@
       "setsas",
       "update"
     ],
-    "sqlServerUniqueName": "[format('{0}-appsvc-sql', parameters('projectPrefix'))]",
-    "sqlServerDBUniqueName": "[format('{0}-appsvc-sql-db', parameters('projectPrefix'))]",
+    "sqlServerUniqueName": "[format('{0}-appsvc-sql', variables('lowerProjectPrefix'))]",
+    "sqlServerDBUniqueName": "[format('{0}-appsvc-sql-db', variables('lowerProjectPrefix'))]",
     "sqlServerDBWeeklyRetention": "P1W",
     "sqlServerDBMonthlyRetention": "P1M",
     "sqlServerDBYearlyRetention": "P5Y",
     "sqlServerDBWeekOfYear": 1,
-    "appSvcPlanUniqueName": "[format('{0}-appsvc-plan', parameters('projectPrefix'))]",
-    "appSvcInsightsUniqueName": "[format('{0}-appsvc-insights', parameters('projectPrefix'))]",
-    "appSvcFunctionUniqueName": "[format('{0}-appsvc-function', parameters('projectPrefix'))]"
+    "appSvcPlanUniqueName": "[format('{0}-appsvc-plan', variables('lowerProjectPrefix'))]",
+    "appSvcInsightsUniqueName": "[format('{0}-appsvc-insights', variables('lowerProjectPrefix'))]",
+    "appSvcFunctionUniqueName": "[format('{0}-appsvc-function', variables('lowerProjectPrefix'))]"
   },
   "resources": [
     {
@@ -297,7 +298,7 @@
       }
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.OperationalInsights/workspaces/{0}', variables('laUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -331,7 +332,7 @@
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2020-08-01",
-      "name": "[format('{0}-appsvc-nsg', parameters('projectPrefix'))]",
+      "name": "[format('{0}-appsvc-nsg', variables('lowerProjectPrefix'))]",
       "location": "[parameters('location')]",
       "tags": "[parameters('resourceTags')]",
       "properties": {
@@ -396,9 +397,9 @@
       }
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
-      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-appsvc-nsg', parameters('projectPrefix')))]",
+      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-appsvc-nsg', variables('lowerProjectPrefix')))]",
       "name": "DiagnosticSettings",
       "properties": {
         "workspaceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
@@ -424,13 +425,13 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', parameters('projectPrefix')))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', variables('lowerProjectPrefix')))]"
       ]
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2020-08-01",
-      "name": "[format('{0}-appsvc-nsg-private-link', parameters('projectPrefix'))]",
+      "name": "[format('{0}-appsvc-nsg-private-link', variables('lowerProjectPrefix'))]",
       "location": "[parameters('location')]",
       "tags": "[parameters('resourceTags')]",
       "properties": {
@@ -495,9 +496,9 @@
       }
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
-      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-appsvc-nsg-private-link', parameters('projectPrefix')))]",
+      "scope": "[format('Microsoft.Network/networkSecurityGroups/{0}', format('{0}-appsvc-nsg-private-link', variables('lowerProjectPrefix')))]",
       "name": "DiagnosticSettings",
       "properties": {
         "workspaceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
@@ -523,7 +524,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', parameters('projectPrefix')))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', variables('lowerProjectPrefix')))]"
       ]
     },
     {
@@ -544,7 +545,7 @@
             "properties": {
               "addressPrefix": "[parameters('subnetAppServicePrefix')]",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', parameters('projectPrefix')))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', variables('lowerProjectPrefix')))]"
               },
               "delegations": [
                 {
@@ -561,7 +562,7 @@
             "properties": {
               "addressPrefix": "[parameters('subnetPrivateLinkPrefix')]",
               "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', parameters('projectPrefix')))]"
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', variables('lowerProjectPrefix')))]"
               },
               "privateEndpointNetworkPolicies": "Disabled"
             }
@@ -570,15 +571,15 @@
         "enableVmProtection": true
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', parameters('projectPrefix')))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', parameters('projectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', variables('lowerProjectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', variables('lowerProjectPrefix')))]",
         "[resourceId('Microsoft.Network/privateDnsZones', variables('plBlobDnsZone'))]",
         "[resourceId('Microsoft.Network/privateDnsZones', variables('plKvDnsZone'))]",
         "[resourceId('Microsoft.Network/privateDnsZones', variables('plSqlDnsZone'))]"
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Network/virtualNetworks/{0}', variables('vNetName'))]",
       "name": "DiagnosticSettings",
@@ -828,7 +829,7 @@
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.KeyVault/vaults/{0}', variables('kvUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -989,7 +990,7 @@
       "type": "Microsoft.Authorization/roleAssignments",
       "apiVersion": "2020-04-01-preview",
       "scope": "[format('Microsoft.Storage/storageAccounts/{0}', variables('saDiagUniqueName'))]",
-      "name": "[guid(parameters('projectPrefix'), resourceGroup().id, deployment().name, variables('sqlServerUniqueName'))]",
+      "name": "[guid(variables('lowerProjectPrefix'), resourceGroup().id, deployment().name, variables('sqlServerUniqueName'))]",
       "properties": {
         "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
         "principalId": "[reference(resourceId('Microsoft.Sql/servers', variables('sqlServerUniqueName')), '2019-06-01-preview', 'Full').identity.principalId]",
@@ -1015,7 +1016,7 @@
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName'))]",
         "[resourceId('Microsoft.Sql/servers', variables('sqlServerUniqueName'))]",
-        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName')), 'Microsoft.Authorization/roleAssignments', guid(parameters('projectPrefix'), resourceGroup().id, deployment().name, variables('sqlServerUniqueName')))]"
+        "[extensionResourceId(resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName')), 'Microsoft.Authorization/roleAssignments', guid(variables('lowerProjectPrefix'), resourceGroup().id, deployment().name, variables('sqlServerUniqueName')))]"
       ]
     },
     {
@@ -1105,7 +1106,7 @@
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Sql/servers/{0}', variables('sqlServerUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -1150,7 +1151,7 @@
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Sql/servers/{0}/databases/{1}', split(format('{0}/{1}', variables('sqlServerUniqueName'), variables('sqlServerDBUniqueName')), '/')[0], split(format('{0}/{1}', variables('sqlServerUniqueName'), variables('sqlServerDBUniqueName')), '/')[1])]",
       "name": "DiagnosticSettings",
@@ -1302,7 +1303,7 @@
       }
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Web/serverfarms/{0}', variables('appSvcPlanUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -1346,7 +1347,7 @@
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Insights/components/{0}', variables('appSvcInsightsUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -1520,7 +1521,7 @@
       ]
     },
     {
-      "type": "microsoft.insights/diagnosticSettings",
+      "type": "Microsoft.Insights/diagnosticSettings",
       "apiVersion": "2017-05-01-preview",
       "scope": "[format('Microsoft.Web/sites/{0}', variables('appSvcFunctionUniqueName'))]",
       "name": "DiagnosticSettings",
@@ -1598,16 +1599,16 @@
             "value": "[variables('vNetNsgFlowLogRetentionInDays')]"
           },
           "nsgAppServiceId": {
-            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', parameters('projectPrefix')))]"
+            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', variables('lowerProjectPrefix')))]"
           },
           "nsgAppServiceName": {
-            "value": "[format('{0}-appsvc-nsg', parameters('projectPrefix'))]"
+            "value": "[format('{0}-appsvc-nsg', variables('lowerProjectPrefix'))]"
           },
           "nsgPrivateLinkId": {
-            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', parameters('projectPrefix')))]"
+            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', variables('lowerProjectPrefix')))]"
           },
           "nsgPrivateLinkName": {
-            "value": "[format('{0}-appsvc-nsg-private-link', parameters('projectPrefix'))]"
+            "value": "[format('{0}-appsvc-nsg-private-link', variables('lowerProjectPrefix'))]"
           }
         },
         "template": {
@@ -1616,8 +1617,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.4.63.48766",
-              "templateHash": "12120239656928091170"
+              "version": "0.4.451.19169",
+              "templateHash": "7812549182661093448"
             }
           },
           "parameters": {
@@ -1718,8 +1719,8 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.OperationalInsights/workspaces', variables('laUniqueName'))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', parameters('projectPrefix')))]",
-        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', parameters('projectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg', variables('lowerProjectPrefix')))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', format('{0}-appsvc-nsg-private-link', variables('lowerProjectPrefix')))]",
         "[resourceId('Microsoft.Storage/storageAccounts', variables('saDiagUniqueName'))]"
       ]
     }
